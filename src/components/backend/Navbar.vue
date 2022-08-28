@@ -161,6 +161,10 @@
                 this.showProfileMenu = false
             },
             onclickLogout(){
+                // Remove LocalStorage
+                localStorage.removeItem('user')
+
+                // Redirect ไปหน้า Login
                 this.$router.push({ name:'Login'})
             }
         }

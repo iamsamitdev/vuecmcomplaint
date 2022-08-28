@@ -21,17 +21,22 @@
 
               <h1 class="mb-4 text-xl font-semibold text-gray-700 dark:text-gray-200">เข้าสู่ระบบ</h1>
 
-              <form>
+              <form @submit.prevent="onSubmit">
 
                 <label class="block mt-3 mb-2 text-sm text-gray-700" for="email">อีเมล์</label>
-                <input class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" type="text" >
+                <input v-model="email" v-validate="'required'" class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" type="text" id="email" name="email">
+
+                <span class="mt-2 text-sm text-red-500">{{ errors.first('email') }}</span>
 
                 <label class="block mt-3 mb-2 text-sm text-gray-700" for="password">รหัสผ่าน</label>
-                <input class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" type="password">
+                <input v-model="password" v-validate="'required'" class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" type="password" id="password" name="password">
+
+                <span class="mt-2 text-sm text-red-500">{{ errors.first('password') }}</span>
 
                 <p class="my-4"></p>
                 
-                <button class="block w-full px-4 py-2 mt-4 text-sm font-medium leading-5 text-center text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg cursor-pointer active:bg-purple-600 hover:bg-purple-700">เข้าสู่ระบบ</button>
+                <input @click="submitForm" type="button" class="block w-full px-4 py-2 mt-4 text-sm font-medium leading-5 text-center text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg cursor-pointer active:bg-purple-600 hover:bg-purple-700" value="เข้าสู่ระบบ">
+
               </form>
 
               <p class="my-8"></p>
@@ -76,7 +81,108 @@
 </template>
 
 <script>
+
+    import http from '@/services/AuthService';
+    // import Swal from 'vue-sweetalert2'
+    import Vue from 'vue'
+
+    const dict = {
+      custom: {
+        email: {
+          required: 'กรุณป้อนอีเมล์ก่อน'
+        },
+        password: {
+          required: 'กรุณาป้อนรหัสผ่านก่อน'
+        }
+      }
+    };
+
     export default {
+
+      data(){
+        return {
+          email: '',
+          password: ''
+        }
+      },
+
+      methods: {
+        submitForm(){
+          
+          this.$validator.validate().then(valid => {
+            if (valid) {
+              // ถ้า validate form ผ่านแล้ว
+              // เรียกใช้งาน API Register
+              http.post('login', 
+                {
+                  "email": this.email,
+                  "password": this.password
+                }
+              ).then(response => {
+                // console.log(response)
+
+                // Redirect ไปหน้า Dashboard
+                // this.$router.push({name: 'Dashboard'})
+
+                let timerInterval
+                Vue.swal({
+                    html: 'กำลังเข้าสู่ระบบ <b></b>',
+                    timer: 2000,
+                    timerProgressBar: true,
+                    didOpen: () => {
+                        Vue.swal.showLoading()
+                        timerInterval = setInterval(() => {
+                        const content = Vue.swal.getContent()
+                        if (content) {
+                            const b = content.querySelector('b')
+                            if (b) {
+                                b.textContent = Vue.swal.getTimerLeft()
+                            }
+                        }
+                        }, 2000)
+                    },
+                    willClose: () => {
+                        clearInterval(timerInterval)
+                    }
+                }).then((result) => {
+                    if (result.dismiss === Vue.swal.DismissReason.timer) {
+
+                      // เก็บข้อมูล user ลง localStorage
+                      localStorage.setItem('user', JSON.stringify(response.data))
+
+                      // Redirect ไปหน้า Dashboard
+                      this.$router.push({name: 'Dashboard'})
+                      
+                    }
+                })
+
+              }).catch(function (error) {
+                if(error.response.status==401){
+
+                  // alert('ข้อมูลเข้าระบบไม่ถูกต้อง')
+                  // Vue.swal('Error', 'Some kind of error', 'error');
+                  Vue.swal({
+                      title: 'มีข้อผิดพลาด!',
+                      text: 'ข้อมูลเข้าระบบไม่ถูกต้อง',
+                      icon: 'error',
+                      confirmButtonText: 'ลองใหม่อีกครั้ง',
+                      allowOutsideClick: false,
+                      allowEscapeKey: true
+                  })
+
+
+                }
+              })
+            }else{
+              // alert("ป้อนข้อมูลในฟอร์มให้ถูกต้องก่อน")
+            }
+          });
+        }
+      },
+
+      mounted() {
+        this.$validator.localize('en', dict);
+      },
         
     }
 </script>

@@ -3,10 +3,14 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 
+// VeeValidate
+import VeeValidate from 'vee-validate';
+
 // Tailwind CSS
 import '@/styles/tailwind.css'
 
 Vue.config.productionTip = false
+Vue.use(VeeValidate);
 
 new Vue({
   router,

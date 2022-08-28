@@ -21,27 +21,37 @@
 
               <h1 class="mb-4 text-xl font-semibold text-gray-700 dark:text-gray-200">สมัครสมาชิกใหม่</h1>
 
-              <form>
+              <form @submit.prevent="onSubmit">
 
                 <label class="block mb-2 text-sm text-gray-700" for="fullname">ชื่อ-สกุล</label>
-                <input class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="fullname" type="text">
+                <input v-model="fullname" v-validate="'required'" class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="fullname" name="fullname" type="text">
+
+                <span class="mt-2 text-sm text-red-500">{{ errors.first('fullname') }}</span>
                 
                 <label class="block mt-3 mb-2 text-sm text-gray-700" for="username">ชื่อผู้ใช้</label>
-                <input class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="username" type="text">
+                <input v-model="username" v-validate="'required'" class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="username" name="username" type="text">
+
+                <span class="mt-2 text-sm text-red-500">{{ errors.first('username') }}</span>
 
                 <label class="block mt-3 mb-2 text-sm text-gray-700" for="mobile">เบอร์โทรศัพท์</label>
-                <input class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="mobile" type="text">
+                <input v-model="mobile" v-validate="'required'" class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="mobile" name="mobile" type="text">
 
+                <span class="mt-2 text-sm text-red-500">{{ errors.first('mobile') }}</span>
 
                 <label class="block mt-3 mb-2 text-sm text-gray-700" for="email">อีเมล์</label>
-                <input class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="email" type="text" autocomplete="email">
+                <input v-model="email" v-validate="'required'" class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="email" name="email" type="text" autocomplete="email">
+
+                <span class="mt-2 text-sm text-red-500">{{ errors.first('email') }}</span>
 
                 <label class="block mt-3 mb-2 text-sm text-gray-700" for="password">รหัสผ่าน</label>
-                <input  class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="password" type="password" autocomplete="current-password">
+                <input v-model="password" v-validate="'required'" class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="password" name="password" type="password" autocomplete="current-password">
 
+                <span class="mt-2 text-sm text-red-500">{{ errors.first('password') }}</span>
     
                 <label class="block mt-3 mb-2 text-sm text-gray-700" for="confirm_password">ยืนยันรหัสผ่าน</label>
-                <input class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="confirm_password" type="password" autocomplete="current-password">
+                <input v-model="confirm_password" v-validate="'required'" class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="confirm_password" name="confirm_password" type="password" autocomplete="current-password">
+
+                <span class="mt-2 text-sm text-red-500">{{ errors.first('confirm_password') }}</span>
 
                 <p class="my-4"></p>
 
@@ -51,7 +61,7 @@
                   </span>
                 </label>
                 
-                <input type="button"
+                <input @click="submitForm" type="button"
                     class="block w-full px-4 py-2 mt-4 text-sm font-medium leading-5 text-center text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg cursor-pointer active:bg-purple-600 hover:bg-purple-700" value="สมัครสมาชิก">
               </form>
 
@@ -94,5 +104,71 @@
 </template>
 
 <script>
+
+    import http from '@/services/AuthService';
+
+    const dict = {
+      custom: {
+        fullname: {
+          required: 'กรุณป้อนชื่อสกุลก่อน'
+        },
+        email: {
+          required: 'กรุณาป้อนอีเมล์'
+        }
+      }
+    };
+
+    export default {
+
+      data(){
+        return {
+          fullname: '',
+          username: '',
+          mobile: '',
+          email: '',
+          password: '',
+          confirm_password: ''
+        }
+      },
+
+      methods: {
+        submitForm(){
+          this.$validator.validate().then(valid => {
+            if (valid) {
+              // ถ้า validate form ผ่านแล้ว
+              // เรียกใช้งาน API Register
+              http.post('register', 
+                {
+                  "fullname": this.fullname,
+                  "username": this.username,
+                  "email": this.email,
+                  "password": this.password,
+                  "password_confirmation": this.confirm_password,
+                  "tel": this.mobile,
+                  "role": 1
+                }
+              ).then(response => {
+                // console.log(response)
+                // เก็บข้อมูล user ลง localStorage
+                localStorage.setItem('user', JSON.stringify(response.data))
+
+                // Redirect ไปหน้า Dashboard
+                this.$router.push({name: 'Dashboard'})
+              })
+            }else{
+              alert("ป้อนข้อมูลในฟอร์มให้ถูกต้องก่อน")
+            }
+          });
+        }
+      },
+
+      mounted() {
+        this.$validator.localize('en', dict);
+      },
+      
+    }
+
     
+
+
 </script>

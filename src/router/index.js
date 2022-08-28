@@ -3,7 +3,10 @@ import VueRouter from 'vue-router'
 
 // Import Frontend Layout
 import FrontendLayout from '@/layouts/Frontend.vue'
+// Import Backend Layout
+import BackendLayout from '@/layouts/Backend.vue'
 
+// Import Frontend Page
 import Home from '../views/frontend/Home.vue'
 import About from '../views/frontend/About.vue'
 import Portfolio from '../views/frontend/Portfolio.vue'
@@ -12,10 +15,35 @@ import Contact from '../views/frontend/Contact.vue'
 import Register from '../views/frontend/Register.vue'
 import Login from '../views/frontend/Login.vue'
 
+// Import Backend Page
+import Dashboard from '../views/backend/Dashboard.vue'
+import Product from '../views/backend/Product.vue'
+
 // 404
 import NotFound404 from '../views/NotFound404.vue'
 
 Vue.use(VueRouter)
+
+// สร้างฟังก์ชันสำหรับ Route Guard
+function authGuard(to, from, next){
+  
+  // อ่าน token จาก localStorage
+  let token = ''
+
+  try{
+    let userStorage = localStorage.getItem('user')
+    let userStorageJSON = userStorage && JSON.parse(userStorage)
+    token = userStorage && userStorageJSON['token']
+    if(token){
+      next()
+    }else{
+      next({name: 'Login'})
+    }
+  }catch(error){
+    console.log(error);
+  }
+
+}
 
 const routes = [
   {
@@ -25,9 +53,13 @@ const routes = [
       {
         path: '',
         name: 'Home',
-        component: Home
+        component: Home,
+        meta: {
+          title: 'หน้าหลัก',
+          description: 'หน้าหลักระบบร้องเรียน'
+        }
       }
-    ]
+    ],
   },
   {
     path: '/about',
@@ -36,9 +68,13 @@ const routes = [
       {
         path: '',
         name: 'About',
-        component: About
+        component: About,
+        meta: {
+          title: 'เกี่ยวกับเรา',
+          description: 'รายละเอียดหน้าเกี่ยวกับเรา'
+        }
       }
-    ]
+    ],
   },
   {
     path: '/portfolio',
@@ -47,9 +83,13 @@ const routes = [
       {
         path: '',
         name: 'Portfolio',
-        component: Portfolio
-      }
-    ]
+        component: Portfolio,
+        meta: {
+          title: 'ผลงานของเรา',
+          description: 'รายละเอียดหน้าผลงานของเรา'
+        }
+      },
+    ],
   },
   {
     path: '/service',
@@ -58,9 +98,13 @@ const routes = [
       {
         path: '',
         name: 'Service',
-        component: Service
+        component: Service,
+        meta: {
+          title: 'บริการของเรา',
+          description: 'รายละเอียดหน้าบริการของเรา'
+        }
       }
-    ]
+    ],
   },
   {
     path: '/contact',
@@ -69,9 +113,13 @@ const routes = [
       {
         path: '',
         name: 'Contact',
-        component: Contact
-      }
-    ]
+        component: Contact,
+        meta: {
+          title: 'ติดต่อเรา',
+          description: 'รายละเอียดหน้าติดต่อเรา'
+        }
+      },
+    ],
   },
   {
     path: '/register',
@@ -80,9 +128,13 @@ const routes = [
       {
         path: '',
         name: 'Register',
-        component: Register
+        component: Register,
+        meta: {
+          title: 'สมัครสมาชิก',
+          description: 'รายละเอียดหน้าสมัครสมาชิก'
+        }
       }
-    ]
+    ],
   },
   {
     path: '/login',
@@ -91,10 +143,49 @@ const routes = [
       {
         path: '',
         name: 'Login',
-        component: Login
+        component: Login,
+        meta: {
+          title: 'เข้าสู่ระบบ',
+          description: 'รายละเอียดหน้าเข้าสู่ระบบ'
+        }
+      }
+    ],
+  },
+
+  // BACKEND ROUTING
+  {
+    path: '/backend',
+    component: BackendLayout,
+    children: [
+      {
+        path: '',
+        name: 'Dashboard',
+        component: Dashboard,
+        meta: {
+          title: 'แดชบอร์ด',
+          description: 'รายละเอียดหน้าแดชบอร์ด'
+        },
+        beforeEnter: authGuard
       }
     ]
   },
+  {
+    path: '/backend',
+    component: BackendLayout,
+    children: [
+      {
+        path: 'products',
+        name: 'Products',
+        component: Product,
+        meta: {
+          title: 'สินค้า',
+          description: 'รายละเอียดหน้าสินค้า'
+        },
+        beforeEnter: authGuard
+      }
+    ]
+  },
+
   // Error 404
   {
     path: "/:catchAll(.*)",

@@ -1,23 +1,106 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+
+// Import Frontend Layout
+import FrontendLayout from '@/layouts/Frontend.vue'
+
+import Home from '../views/frontend/Home.vue'
+import About from '../views/frontend/About.vue'
+import Portfolio from '../views/frontend/Portfolio.vue'
+import Service from '../views/frontend/Service.vue'
+import Contact from '../views/frontend/Contact.vue'
+import Register from '../views/frontend/Register.vue'
+import Login from '../views/frontend/Login.vue'
+
+// 404
+import NotFound404 from '../views/NotFound404.vue'
 
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: '/',
-    name: 'home',
-    component: HomeView
+    component: FrontendLayout,
+    children: [
+      {
+        path: '',
+        name: 'Home',
+        component: Home
+      }
+    ]
   },
   {
     path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
+    component: FrontendLayout,
+    children: [
+      {
+        path: '',
+        name: 'About',
+        component: About
+      }
+    ]
+  },
+  {
+    path: '/portfolio',
+    component: FrontendLayout,
+    children: [
+      {
+        path: '',
+        name: 'Portfolio',
+        component: Portfolio
+      }
+    ]
+  },
+  {
+    path: '/service',
+    component: FrontendLayout,
+    children: [
+      {
+        path: '',
+        name: 'Service',
+        component: Service
+      }
+    ]
+  },
+  {
+    path: '/contact',
+    component: FrontendLayout,
+    children: [
+      {
+        path: '',
+        name: 'Contact',
+        component: Contact
+      }
+    ]
+  },
+  {
+    path: '/register',
+    component: FrontendLayout,
+    children: [
+      {
+        path: '',
+        name: 'Register',
+        component: Register
+      }
+    ]
+  },
+  {
+    path: '/login',
+    component: FrontendLayout,
+    children: [
+      {
+        path: '',
+        name: 'Login',
+        component: Login
+      }
+    ]
+  },
+  // Error 404
+  {
+    path: "/:catchAll(.*)",
+    component: NotFound404,
   }
+  
 ]
 
 const router = new VueRouter({
